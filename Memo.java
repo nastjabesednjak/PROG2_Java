@@ -5,31 +5,72 @@ import java.util.*;
 import java.awt.*;
 import java.util.Arrays;
 
-class Panel extends JPanel {
-
-    public Panel() {
-        super();
-        setBackground(Color.WHITE);
-    }
-
-    public void krogec(Graphics g, int x, int y, Color barva) {
-        super.paint(g); // klic metode nadrazreda
-        Graphics2D graphics = (Graphics2D) g; // pretvarjanje tipov
-        int polmer = 50;
-
-        graphics.setColor(barva);
-        graphics.setStroke(new BasicStroke(2.0f)); // čopič debeline 2
-        graphics.fillOval(x, y, polmer, polmer);
-    }
-
-    }
-
 public class Memo {
+
+    public static final Color PURPLE = new Color(102, 0, 153);
+
+    public static int cX = 75;
+    public static int cY = 75;
+
+    private static class Krog {
+        int x;
+        int y;
+        int r = 50;
+        Color barva;
+
+        public Krog(int xk, int yk, Color barva_k) {
+            this.x = xk;
+            this.y = yk;
+            this.barva = barva_k;
+        }
+    }
+
+    static LinkedList<Krog> krogi = new LinkedList<>();
+    static LinkedList<Krog> prikaz = new LinkedList<>();
+
+    private static void dodajKrog(Color barva) {
+        Krog nov = new Krog(cX, cY, barva);
+        krogi.add(nov);
+
+        cX += 75;
+        if (cX > 300) {
+            cX = 75;
+            cY += 75;
+        }
+    }
+
+    private static class Panel extends JPanel {
+
+        public Panel() {
+            super();
+            setBackground(Color.WHITE);
+        }
+
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g); // klic metode nadrazreda
+            Graphics2D graphics = (Graphics2D) g; // pretvarjanje tipov
+            graphics.setStroke(new BasicStroke(2.0f)); // čopič debeline 2
+
+            for (int i = 0; i < krogi.size(); i++) {
+                Krog trenutni = krogi.get(i);
+                graphics.setColor(trenutni.barva);
+                graphics.fillOval(trenutni.x, trenutni.y, trenutni.r, trenutni.r);
+            }
+
+            for (int i = 0; i < prikaz.size(); i++) {
+                Krog trenutni = prikaz.get(i);
+                graphics.setColor(trenutni.barva);
+                graphics.fillOval(400 + trenutni.x, trenutni.y, trenutni.r, trenutni.r);
+            }
+        }
+
+    }
 
     //Računalnik naključno izbere 4 izmed 6 barv
     private static int[] izbira() {
 
-        LinkedList<Integer> barveList= new LinkedList<Integer>();
+        LinkedList<Integer> barveList = new LinkedList<Integer>();
 
         for (int i = 1; i <= 6; i++) {
             barveList.add(i);
@@ -76,18 +117,12 @@ public class Memo {
                     break;
             }
         }
-
-
     }
 
     private static void primerjavaResitev() {
         int[] barve = izbira();
         int[] vnos = new int[4];
-
-        if (barve )
     }
-
-
 
     public static void main(String[] args) {
         int x1 = 25;
@@ -98,19 +133,12 @@ public class Memo {
         int poskus = 0;
         int tezavnost = 24;
         int tezavnostRaw = 6;
-        Color barva = new Color(0, 0, 0);
+
+        final int[] pravilnihMest = {0};
+        final int[] pravilnihBaru = {0};
 
         int[] barve = izbira();
-        int[] vnos = new int[4];
-        int[] prikaz = new int[4];
-        int pravilnoMestoBarva = 0;
-        int pravilnaBarva = 0;
-
-        // Uporabniško okno
-        //JFrame okvir = new JFrame("Memo, ugani barve!");
-        //okvir.pack();
-        //okvir.setVisible(true);
-        //okvir.setSize(new Dimension(1024, 720));
+        LinkedList<Integer> vnos = new LinkedList<>();
 
         JFrame frame = new JFrame("Memo, ugani barve!");
         frame.setSize(new Dimension(1024, 720)); // nastavimo sirino in dolzino okna
@@ -124,11 +152,9 @@ public class Memo {
         frame.setLayout(new BorderLayout());
         frame.add(panel, BorderLayout.CENTER); // bel panel dodamo v center
         JPanel north = new JPanel();
-        frame.add(north, BorderLayout.NORTH); // en panel dodamo na vrh
+        frame.add(north, BorderLayout.NORTH); // en panel doda  mo na vrh
 
         north.add(new JLabel("Izberi barvo: ")); // napis na začetku severnega panela
-
-
 
         JButton button0 = new JButton("Modra"); // dodamo gumb
         button0.setPreferredSize(new Dimension(96, 40));
@@ -137,7 +163,43 @@ public class Memo {
         button0.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
+                dodajKrog(Color.BLUE);
+                panel.repaint();
+                vnos.add(1);
 
+                int[] help = new int[4];
+
+                for (int i = 0; i < 4; i++) {
+                    help[i] = barve[i];
+                }
+
+                if (vnos.size() >= 4) {
+                    for (int i = 0; i < 4; i++) {
+                        if (vnos.get(i) == help[i]) {
+                            pravilnihMest[0]++;
+                            vnos.set(i, 0);
+                            help[i] = 0;
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (help[i] != 0 && help[i] == vnos.get(j)) {
+                                pravilnihBaru[0]++;
+                                help[i] = 0;
+                                vnos.set(j, 0);
+                            }
+                        }
+                    }
+                    for (int i = 0; i < pravilnihMest[0]; i++) {
+                        Krog nov = new Krog(400 + i*75, cY, Color.BLACK);
+                        prikaz.add(nov);
+                    }
+                    for (int i = 0; i < pravilnihBaru[0]; i++) {
+                        Krog nov = new Krog(400 + (i + pravilnihMest[0])*75, cY, Color.WHITE);
+                        prikaz.add(nov);
+                    }
+                    panel.repaint();
+                }
             }
         });
         north.add(button0);
@@ -149,7 +211,43 @@ public class Memo {
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //ball = new Point(panel.getWidth() / 2, panel.getHeight() / 2);
+                dodajKrog(Color.RED);
+                panel.repaint();
+                vnos.add(2);
+
+                int[] help = new int[4];
+
+                for (int i = 0; i < 4; i++) {
+                    help[i] = barve[i];
+                }
+
+                if (vnos.size() >= 4) {
+                    for (int i = 0; i < 4; i++) {
+                        if (vnos.get(i) == help[i]) {
+                            pravilnihMest[0]++;
+                            vnos.set(i, 0);
+                            help[i] = 0;
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (help[i] != 0 && help[i] == vnos.get(j)) {
+                                pravilnihBaru[0]++;
+                                help[i] = 0;
+                                vnos.set(j, 0);
+                            }
+                        }
+                    }
+                    for (int i = 0; i < pravilnihMest[0]; i++) {
+                        Krog nov = new Krog(400 + i*75, cY, Color.BLACK);
+                        prikaz.add(nov);
+                    }
+                    for (int i = 0; i < pravilnihBaru[0]; i++) {
+                        Krog nov = new Krog(400 + (i + pravilnihMest[0])*75, cY, Color.WHITE);
+                        prikaz.add(nov);
+                    }
+                    panel.repaint();
+                }
             }
         });
         north.add(button1);
@@ -161,7 +259,43 @@ public class Memo {
         button2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //ball = new Point(panel.getWidth() / 2, panel.getHeight() / 2);
+                dodajKrog(Color.YELLOW);
+                panel.repaint();
+                vnos.add(3);
+
+                int[] help = new int[4];
+
+                for (int i = 0; i < 4; i++) {
+                    help[i] = barve[i];
+                }
+
+                if (vnos.size() >= 4) {
+                    for (int i = 0; i < 4; i++) {
+                        if (vnos.get(i) == help[i]) {
+                            pravilnihMest[0]++;
+                            vnos.set(i, 0);
+                            help[i] = 0;
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (help[i] != 0 && help[i] == vnos.get(j)) {
+                                pravilnihBaru[0]++;
+                                help[i] = 0;
+                                vnos.set(j, 0);
+                            }
+                        }
+                    }
+                    for (int i = 0; i < pravilnihMest[0]; i++) {
+                        Krog nov = new Krog(400 + i*75, cY, Color.BLACK);
+                        prikaz.add(nov);
+                    }
+                    for (int i = 0; i < pravilnihBaru[0]; i++) {
+                        Krog nov = new Krog(400 + (i + pravilnihMest[0])*75, cY, Color.WHITE);
+                        prikaz.add(nov);
+                    }
+                    panel.repaint();
+                }
             }
         });
         north.add(button2);
@@ -173,19 +307,91 @@ public class Memo {
         button3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //ball = new Point(panel.getWidth() / 2, panel.getHeight() / 2);
+                dodajKrog(Color.GREEN);
+                panel.repaint();
+                vnos.add(4);
+
+                int[] help = new int[4];
+
+                for (int i = 0; i < 4; i++) {
+                    help[i] = barve[i];
+                }
+
+                if (vnos.size() >= 4) {
+                    for (int i = 0; i < 4; i++) {
+                        if (vnos.get(i) == help[i]) {
+                            pravilnihMest[0]++;
+                            vnos.set(i, 0);
+                            help[i] = 0;
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (help[i] != 0 && help[i] == vnos.get(j)) {
+                                pravilnihBaru[0]++;
+                                help[i] = 0;
+                                vnos.set(j, 0);
+                            }
+                        }
+                    }
+                    for (int i = 0; i < pravilnihMest[0]; i++) {
+                        Krog nov = new Krog(400 + i*75, cY, Color.BLACK);
+                        prikaz.add(nov);
+                    }
+                    for (int i = 0; i < pravilnihBaru[0]; i++) {
+                        Krog nov = new Krog(400 + (i + pravilnihMest[0])*75, cY, Color.WHITE);
+                        prikaz.add(nov);
+                    }
+                    panel.repaint();
+                }
             }
         });
         north.add(button3);
 
         JButton button4 = new JButton("Vijolična"); // dodamo gumb
         button4.setPreferredSize(new Dimension(96, 40));
-        button4.setBackground(Color.MAGENTA);
+        button4.setBackground(PURPLE);
         button4.setForeground(Color.WHITE);
         button4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //ball = new Point(panel.getWidth() / 2, panel.getHeight() / 2);
+                dodajKrog(PURPLE);
+                panel.repaint();
+                vnos.add(5);
+
+                int[] help = new int[4];
+
+                for (int i = 0; i < 4; i++) {
+                    help[i] = barve[i];
+                }
+
+                if (vnos.size() >= 4) {
+                    for (int i = 0; i < 4; i++) {
+                        if (vnos.get(i) == help[i]) {
+                            pravilnihMest[0]++;
+                            vnos.set(i, 0);
+                            help[i] = 0;
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (help[i] != 0 && help[i] == vnos.get(j)) {
+                                pravilnihBaru[0]++;
+                                help[i] = 0;
+                                vnos.set(j, 0);
+                            }
+                        }
+                    }
+                    for (int i = 0; i < pravilnihMest[0]; i++) {
+                        Krog nov = new Krog(400 + i*75, cY, Color.BLACK);
+                        prikaz.add(nov);
+                    }
+                    for (int i = 0; i < pravilnihBaru[0]; i++) {
+                        Krog nov = new Krog(400 + (i + pravilnihMest[0])*75, cY, Color.WHITE);
+                        prikaz.add(nov);
+                    }
+                    panel.repaint();
+                }
             }
         });
         north.add(button4);
@@ -197,17 +403,49 @@ public class Memo {
         button5.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //ball = new Point(panel.getWidth() / 2, panel.getHeight() / 2);
+                dodajKrog(Color.ORANGE);
+                panel.repaint();
+                vnos.add(6);
+
+                int[] help = new int[4];
+
+                for (int i = 0; i < 4; i++) {
+                    help[i] = barve[i];
+                }
+
+                if (vnos.size() >= 4) {
+                    for (int i = 0; i < 4; i++) {
+                        if (vnos.get(i) == help[i]) {
+                            pravilnihMest[0]++;
+                            vnos.set(i, 0);
+                            help[i] = 0;
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (help[i] != 0 && help[i] == vnos.get(j)) {
+                                pravilnihBaru[0]++;
+                                help[i] = 0;
+                                vnos.set(j, 0);
+                            }
+                        }
+                    }
+                    for (int i = 0; i < pravilnihMest[0]; i++) {
+                        Krog nov = new Krog(400 + i*75, cY, Color.BLACK);
+                        prikaz.add(nov);
+                    }
+                    for (int i = 0; i < pravilnihBaru[0]; i++) {
+                        Krog nov = new Krog(400 + (i + pravilnihMest[0])*75, cY, Color.WHITE);
+                        prikaz.add(nov);
+                    }
+                    panel.repaint();
+                }
             }
         });
         north.add(button5);
 
-
-
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-
-
 
         System.out.println(Arrays.toString(barve));
     }
