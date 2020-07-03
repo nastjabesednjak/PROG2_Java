@@ -80,6 +80,13 @@ public class Memo {
 
     }
 
+    private static void primerjavaResitev() {
+        int[] barve = izbira();
+        int[] vnos = new int[4];
+
+        if (barve )
+    }
+
 
 
     public static void main(String[] args) {
