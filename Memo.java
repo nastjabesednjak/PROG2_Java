@@ -53,7 +53,6 @@ public class Memo {
             setBackground(Color.WHITE);
         }
 
-        //@Override
         public void paint(Graphics g) {
             super.paint(g); // klic metode nadrazreda
             Graphics2D graphics = (Graphics2D) g; // pretvarjanje tipov
@@ -81,7 +80,9 @@ public class Memo {
         }
     }
 
-    //Računalnik naključno izbere 4 izmed 6 barv
+    /*
+    Računalnik naključno izbere 4 izmed 6 barv
+     */
     private static int[] izbira() {
 
         LinkedList<Integer> barveList = new LinkedList<Integer>();
@@ -99,13 +100,10 @@ public class Memo {
         return  barve;
     }
 
-    // Prikaže se pravilna resitev
+    /*
+     Prikaže se pravilna resitev
+     */
     private static void izpisiResitev(int[] resitev, JPanel panel) {
-
-        int x5 = 175;
-        int x6 = 150;
-        int y3 = 50;
-        int y4 = 25;
 
         Color[] barve = new Color[4];
 
@@ -197,7 +195,26 @@ public class Memo {
         frame.setLayout(new BorderLayout());
         frame.add(panel, BorderLayout.CENTER); // bel panel dodamo v center
         JPanel north = new JPanel();
-        frame.add(north, BorderLayout.NORTH); // en panel doda  mo na vrh
+        frame.add(north, BorderLayout.NORTH); // en panel dodamo na vrh
+
+        JMenuBar mb = new JMenuBar();
+        JMenu menu = new JMenu("Meni");
+        JMenu tezavnostMenu = new JMenu("Težavnost");
+        JMenuItem pravila = new JMenuItem("Pravila");
+        JMenuItem igra = new JMenuItem("Nova igra");
+        JMenuItem lahka = new JMenuItem("Lahka težavnost");
+        JMenuItem srednja = new JMenuItem("Srednja težavnost");
+        JMenuItem tezka = new JMenuItem("Težka težavnost");
+
+        menu.add(pravila);
+        menu.add(igra);
+        menu.add(tezavnostMenu);
+        tezavnostMenu.add(lahka);
+        tezavnostMenu.add(srednja);
+        tezavnostMenu.add(tezka);
+        mb.add(menu);
+
+        frame.setJMenuBar(mb);
 
         north.add(new JLabel("Izberi barvo: ")); // napis na začetku severnega panela
 
@@ -311,7 +328,5 @@ public class Memo {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-
-        System.out.println(Arrays.toString(barve));
     }
 }
