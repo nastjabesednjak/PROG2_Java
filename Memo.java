@@ -29,6 +29,7 @@ public class Memo {
     static LinkedList<Krog> prikaz = new LinkedList<>();
     static LinkedList<Integer> vnos = new LinkedList<>();
     static LinkedList<Krog> resitevList = new LinkedList<>();
+    static int[] barve;
     static int pravilnihMest = 0;
     static int pravilnihBarv = 0;
     static int poskus = 0;
@@ -176,13 +177,43 @@ public class Memo {
         }
     }
 
+    private static void novaIgra() {
+        krogi.clear();
+        prikaz.clear();
+        vnos.clear();
+        resitevList.clear();
+        tezavnost = tezavnostRaw * 4;
+        pravilnihMest = 0;
+        pravilnihBarv = 0;
+        poskus = 0;
+        cX = 75;
+        cY = 75;
+        barve = izbira();
+    }
+
+    private static void navodila() {
+        JFrame frame = new JFrame("Memo - navodila");
+        TextArea area = new TextArea("Računalnik od začetku igre izbere 4 od 6 različnih barv (modra, rdeča, rumena, zelena, vijolična in oranžna) brez ponavljanja.\n" +
+                "Cilj igre je razvozlati barvno šifro.\n" +
+                "Glede na izbrano težavnost ima igralec na voljo 5, 6, ali 7 poskusov.\n" +
+                "Za vsako pravilno izbrano bravo, se igracu pokaže bel krogec, za bravo, ki je na pravem mestu pa črn krogec.\n" +
+                "Igra se konča, ko igralec ugane šifro ali mu zmanjka poskusov.\n", 1, 1, TextArea.SCROLLBARS_NONE);
+        Font font = new Font("Verdana", Font.PLAIN, 20);
+        area.setFont(font);
+        frame.add(area);
+        frame.setSize(new Dimension(720, 540)); // nastavimo sirino in dolzino okna
+        frame.setResizable(true); // velikost okna lahko spreminjamo
+        frame.setVisible(true);
+        area.setEditable(false);
+    }
+
     public static void main(String[] args) {
         int x1 = 25;
         int x2 = 0;
         int y1 = 50;
         int y2 = 25;
 
-        int[] barve = izbira();
+        barve = izbira();
 
         JFrame frame = new JFrame("Memo, ugani barve!");
         frame.setSize(new Dimension(1024, 720)); // nastavimo sirino in dolzino okna
@@ -197,6 +228,9 @@ public class Memo {
         JPanel north = new JPanel();
         frame.add(north, BorderLayout.NORTH); // en panel dodamo na vrh
 
+        /*
+        Izbire v menuju.
+         */
         JMenuBar mb = new JMenuBar();
         JMenu menu = new JMenu("Meni");
         JMenu tezavnostMenu = new JMenu("Težavnost");
@@ -215,6 +249,48 @@ public class Memo {
         mb.add(menu);
 
         frame.setJMenuBar(mb);
+
+        pravila.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                navodila();
+            }
+        });
+
+        igra.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                novaIgra();
+                panel.repaint();
+            }
+        });
+
+        lahka.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tezavnostRaw = 7;
+                novaIgra();
+                panel.repaint();
+            }
+        });
+
+        srednja.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tezavnostRaw = 6;
+                novaIgra();
+                panel.repaint();
+            }
+        });
+
+        tezka.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tezavnostRaw = 5;
+                novaIgra();
+                panel.repaint();
+            }
+        });
 
         north.add(new JLabel("Izberi barvo: ")); // napis na začetku severnega panela
 
